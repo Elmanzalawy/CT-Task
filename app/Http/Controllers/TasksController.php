@@ -17,6 +17,7 @@ class TasksController extends Controller
         return Task::when($request->project_id, function($task) use ($request){
             $task->where("project_id", $request->project_id);
         })
+        ->orderBy('priority')
         ->get();
     }
 
@@ -30,11 +31,11 @@ class TasksController extends Controller
     {
         $task = Task::create([
             'name' => $request->name,
-            'priority' => $request->priority,
+            'priority' => $request->priority ?? 1,
             'project_id' => $request->project_id ?? null,
         ]);
 
-        return $task->fresh();
+        return response()->json($task->fresh());
     }
 
     /**

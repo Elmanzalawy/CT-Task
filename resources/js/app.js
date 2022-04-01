@@ -1,10 +1,10 @@
 require('./bootstrap');
 
 import { createApp } from 'vue';
-import ExampleComponent from "./components/ExampleComponent.vue"
+import TasksWrapper from "./components/TasksWrapper.vue"
 
 createApp({
     components:{
-        ExampleComponent,
+        TasksWrapper,
     }
 }).mount("#app")

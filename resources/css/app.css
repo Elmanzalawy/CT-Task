@@ -1,0 +1,18 @@
+body{
+    background: linear-gradient(45deg, rgba(255, 0, 0, 0.229), rgba(0, 0, 255, 0.229));
+}
+
+#container{
+    padding: 2rem;
+    position: absolute;
+    border: 1px solid rgba(128, 0, 128, 0.09);
+    border-radius: 1rem;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -10%);
+    background: rgba(178, 178, 178, 0.402);
+}
+
+#container h1{
+    text-align: center;
+}
