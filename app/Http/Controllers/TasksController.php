@@ -40,6 +40,13 @@ class TasksController extends Controller
         return response()->json($task->fresh());
     }
 
+    /**
+     * Swap the priority of two tasks.
+     *
+     * @param  \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function swapTasks(Request $request){
         $task1 = Task::find($request->task1);
         $task2 = Task::find($request->task2);
