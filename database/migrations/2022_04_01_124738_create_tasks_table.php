@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('priority')->default(1);
-            $table->unsignedBigInteger('project_id')->nullable();
+            $table->unsignedBigInteger('project_id');
             $table->foreign('project_id')->references('id')->on('projects');
             $table->timestamps();
         });
