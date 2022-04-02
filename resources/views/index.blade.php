@@ -22,7 +22,7 @@
         <div id="app">
             <div id="container">
                 <h1>{{ env('APP_NAME') ?? "Task Manager"}}</h1>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus consequuntur dolorum reiciendis repudiandae nostrum, tempore incidunt quibusdam numquam ipsam sequi praesentium inventore perferendis consequatur ipsum assumenda aliquid eius facere voluptatum eum quam temporibus perspiciatis unde. Totam eius nisi est odit dolore quidem assumenda, recusandae quas. Corrupti, dolorum unde! Dolores, laboriosam!</p>
+                <p>Task Manager is an app where you can create, edit, delete tasks, and reorder them by priority. It is also possible to group tasks by projects!</p>
                 <tasks-wrapper></tasks-wrapper>
             </div>
         </div>
