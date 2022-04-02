@@ -25,6 +25,7 @@
                 <p>Task Manager is an app where you can create, edit, delete tasks, and reorder them by priority. It is also possible to group tasks by projects!</p>
                 <tasks-wrapper></tasks-wrapper>
             </div>
+            <Foot/>
         </div>
 
         <script src="{{ asset("js/app.js") }}"></script>
