@@ -33,8 +33,8 @@ class TasksController extends Controller
     {
         $task = Task::create([
             'name' => $request->name,
-            'priority' => $request->priority ?? Task::max('priority') + 1,
-            'project_id' => $request->project_id ?? null,
+            'priority' => $request->priority ?? Task::where('project_id', $request->project_id)->max('priority') + 1,
+            'project_id' => $request->project_id,
         ]);
 
         return response()->json($task->fresh());

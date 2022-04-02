@@ -14,7 +14,7 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        return Project::all();
+        return response()->json(Project::all());
     }
 
     /**
@@ -25,11 +25,16 @@ class ProjectsController extends Controller
      */
     public function store(Request $request)
     {
-        $project = Project::create([
-            'name' => $request->name,
+        Project::where('selected', 1)->update([
+            'selected' => 0
         ]);
 
-        return $project->fresh();
+        $project = Project::create([
+            'name' => $request->name,
+            'selected' => 1,
+        ]);
+
+        return response()->json($project->fresh());
     }
 
     /**
@@ -40,7 +45,7 @@ class ProjectsController extends Controller
      */
     public function show(Project $project)
     {
-        return $project;
+        return response()->json($project);
     }
 
     /**
@@ -52,11 +57,17 @@ class ProjectsController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $project->update([
-            'name' => $request->name ?? $project->name,
+        Project::where('id', '!=', $project->id)
+        ->where('selected', 1)->update([
+            'selected' => 0
         ]);
 
-        return $project;
+        $project->update([
+            'name' => $request->name ?? $project->name,
+            'selected' => $request->selected ?? 0,
+        ]);
+
+        return response()->json($project);
     }
 
     /**
@@ -67,6 +78,6 @@ class ProjectsController extends Controller
      */
     public function destroy(Project $project)
     {
-        return $project->delete();
+        return response()->json($project->delete());
     }
 }

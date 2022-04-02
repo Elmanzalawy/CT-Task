@@ -1,7 +1,20 @@
 <template>
-    <form v-on:submit="addTask">
+
+    <form v-on:submit="changeProject">
+        <div id="project-form-wrapper">
+            <label id="project-select" for="project-select">Select Project: </label>
+            <select v-if="this.currentProjectId" id="project-select" type="text" name="project_id" placeholder="Project ID" @change="this.changeProject($event)">
+                <option v-for="project in projects" :key="project.id" :value="project.id" :selected="project.selected"> {{project.name}} </option>
+            </select>
+            <label v-if="this.currentProjectId" for="add-project-input">Or</label>
+            <input v-model="projectNameInput" id="add-project-input" type="text" name="projectNameInput" placeholder="Add Project">
+            <button id="add-project" type="submit">Add Project</button>
+        </div>
+    </form>
+
+    <form v-if="this.currentProjectId" v-on:submit="addTask">
         <div id="task-form-wrapper">
-            <input v-model="inputName" id="name-input" type="text" name="name" placeholder="Task name">
+            <input v-model="taskNameInput" id="name-input" type="text" name="name" placeholder="Task name">
             <input v-model="inputPriority" id="priority-input" type="number" name="priority" placeholder="Priority">
             <button id="add-task" type="submit">Add Task</button>
         </div>
@@ -20,34 +33,94 @@ export default {
     },
     data(){
         return {
+            projects: [],
+            currentProjectId : null,
             tasks : [],
             priority: 0,
-            inputName : null,
+            projectNameInput : null,
+            taskNameInput : null,
             inputPriority : null,
             dragStartIndex : null,
         }
     },
     methods:{
+        getProjects(){
+            axios.get("/api/project").then((response) => {
+                // console.log('retrieved projects')
+                this.projects = response.data
+
+                //get currently selected project
+                this.projects.forEach(project => {
+                    if(project.selected == 1){
+                        this.currentProjectId = project.id
+                        return
+                    }
+                });
+
+                this.getTasks()
+            })
+        },
         getTasks(){
-            axios.get("/api/task").then((response) => {
-                console.log('retrieved tasks')
+
+            axios.get(`/api/task?project_id=${this.currentProjectId}`).then((response) => {
+                // console.log('retrieved tasks')
                 this.tasks = response.data
                 setTimeout(() => {
                     this.addDraggableEvents()
                 }, 500);
             })
         },
+        changeProject(e){
+            // console.log('changing project')
+            if(this.projectNameInput){
+                axios({
+                    method: "post",
+                    url: "/api/project",
+                    data: {
+                        name : this.projectNameInput,
+                    },
+                })
+                .then((response) => {
+                    this.projectNameInput = ""
+                    this.getProjects()
+                })
+                .catch(() => {
+                    console.log('an error has occured.')
+                })
+            }
+            else{
+                // console.log('updating..')
+                axios({
+                    method: "put",
+                    url: `/api/project/${e.target.value}`,
+                    data: {
+                        selected : 1,
+                    },
+                })
+                .then((response) => {
+                    this.projectNameInput = ""
+                    this.getProjects()
+                })
+                .catch(() => {
+                    console.log('an error has occured.')
+                })
+
+            }
+            // To prevent the form from submitting
+            e.preventDefault();
+        },
         addTask(e){
             axios({
             method: "post",
                 url: "/api/task",
                 data: {
-                    name : this.inputName,
+                    name : this.taskNameInput,
                     priority : this.inputPriority ?? null,
+                    project_id: this.currentProjectId,
                 },
             })
             .then((response) => {
-                this.inputName = ""
+                this.taskNameInput = ""
                 this.inputPriority = ""
                 return this.getTasks()
             })
@@ -79,7 +152,7 @@ export default {
             const task1 = this.tasks[from]
             const task2 = this.tasks[to]
 
-            console.log(task1, task2)
+            // console.log(task1, task2)
 
             axios({
             method: "post",
@@ -133,21 +206,31 @@ export default {
 
     },
     mounted(){
+        this.getProjects()
         this.getTasks()
     }
 
 }
 </script>
 
-<style>
+<style scoped>
 #task-form-wrapper{
     display: flex;
     justify-content: space-between;
 }
-#task-form-wrapper input{
-    width: 40%;
+label{
+    color: #252525;
+}
+input, select, button{
     padding: 0.5rem;
+    margin: 0.5rem;
     border-radius: 5px;
+}
+#add-project{
+    background: none;
+    border: 1px solid rgb(0, 103, 3);
+    cursor: pointer;
+
 }
 #task-form-wrapper #add-task{
     background: rgba(0, 191, 255, 0);
@@ -162,9 +245,12 @@ export default {
     color: rgb(57, 57, 57);
     transition: 0.5s background;
 }
+#task-form-wrapper input{
+    width: 40%;
+}
 
 #tasks-wrapper{
-    margin-top: 0.5rem;
+    /* margin-top: 0.5rem; */
     padding-right: 1rem;
     max-height: 50rem;
     overflow-y: scroll;
