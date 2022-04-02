@@ -1,7 +1,7 @@
 <template>
-    <div class="task">
+    <div class="task" :id="'task-'+this.task.id" :priority="this.priority">
         <div class="priority">
-            <span><b>#{{this.task.id}}</b></span>
+            <span><b>#{{this.priority + 1}}</b></span>
         </div>
         <div class="task-body">
             <textarea class="name" v-model="task.name" v-on:keydown.enter="save($event)"></textarea>
@@ -18,7 +18,8 @@
 <script>
 export default {
     props: {
-        task:Object,
+        task : Object,
+        priority : Number,
     },
     data(){
         return{
@@ -69,10 +70,13 @@ export default {
     background: radial-gradient( rgba(255, 0, 0, 0.114), rgba(0, 0, 255, 0.114));
     padding: 0.5rem;
     border: 1px solid rgb(138, 138, 138);
-    border-radius: 1rem;
+    border-radius: 5px;
 }
 .task .priority{
-    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
     margin-right: 1rem;
 }
 .task .name{

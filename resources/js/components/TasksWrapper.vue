@@ -7,7 +7,7 @@
         </div>
     </form>
   <div id="tasks-wrapper">
-    <Task v-for="task in tasks" :key="task.id" :task="task"/>
+    <Task v-for="(task, index) in tasks" :key="task.id" :task="task" :priority="index" draggable="true"/>
   </div>
 </template>
 
@@ -21,8 +21,10 @@ export default {
     data(){
         return {
             tasks : [],
+            priority: 0,
             inputName : null,
             inputPriority : null,
+            dragStartIndex : null,
         }
     },
     methods:{
@@ -30,6 +32,9 @@ export default {
             axios.get("/api/task").then((response) => {
                 console.log('retrieved tasks')
                 this.tasks = response.data
+                setTimeout(() => {
+                    this.addDraggableEvents()
+                }, 500);
             })
         },
         addTask(e){
@@ -42,21 +47,90 @@ export default {
                 },
             })
             .then((response) => {
-                //handle success
-                console.log('success');
+                this.inputName = ""
+                this.inputPriority = ""
                 return this.getTasks()
             })
             .catch(() => {
-                console.log('err')
+                console.log('an error has occured.')
             })
-
-
-                this.inputName = ""
-                this.inputPriority = ""
 
             // To prevent the form from submitting
             e.preventDefault();
+        },
+        addDraggableEvents(){
+            const taskElements = document.getElementsByClassName('task');
+
+            for(let i=0; i<taskElements.length; i++){
+                taskElements[i].addEventListener('dragstart', this.dragStart);
+                taskElements[i].addEventListener('dragover', this.dragOver);
+                taskElements[i].addEventListener('drop', this.drop);
+                taskElements[i].addEventListener('dragenter', this.dragEnter);
+                taskElements[i].addEventListener('dragleave', this.dragLeave);
+            }
+        },
+        dragStart(e) {
+            this.dragStartIndex = e.target.getAttribute('priority');
+        },
+        dragOver(e) {
+            e.preventDefault();
+        },
+        swapItems(from, to) {
+            const task1 = this.tasks[from]
+            const task2 = this.tasks[to]
+
+            console.log(task1, task2)
+
+            axios({
+            method: "post",
+                url: "/api/task/swap-tasks",
+                data: {
+                    task1 : task1.id,
+                    task2 : task2.id,
+                },
+            })
+            .then((response) => {
+
+            })
+            .catch(() => {
+                console.log('an error has occured.')
+            })
+
+            this.tasks[from] = task2
+            this.tasks[to] = task1
+
+        },
+        dragEnter(e) {
+            // console.log(e.target)
+            let el = e.target
+            if (el.classList.contains('task')){
+                el.classList.add('highlight')
+            }else{
+                el.closest(".task").classList.add("highlight")
+            }
+        },
+        dragLeave(e) {
+            let el = e.target
+            if (el.classList.contains('task')){
+                el.classList.remove('highlight')
+            }else{
+                el.closest(".task").classList.remove("highlight")
+            }
+        },
+        drop(e) {
+            let  el = e.target
+
+            if (!el.classList.contains('task')){
+                el = e.target.closest(".task")
+            }
+
+            const dragEndIndex = el.getAttribute('priority');
+            this.swapItems(this.dragStartIndex, dragEndIndex);
+
+            this.dragStartIndex = null;
+            e.target.classList.remove('highlight');
         }
+
     },
     mounted(){
         this.getTasks()
@@ -95,5 +169,9 @@ export default {
     max-height: 50rem;
     overflow-y: scroll;
     scroll-behavior: smooth;
+}
+
+.highlight{
+  background: #c7c7c753 !important;
 }
 </style>

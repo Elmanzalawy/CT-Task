@@ -14,11 +14,13 @@ class TasksController extends Controller
      */
     public function index(Request $request)
     {
-        return Task::when($request->project_id, function($task) use ($request){
+        $tasks = Task::when($request->project_id, function($task) use ($request){
             $task->where("project_id", $request->project_id);
         })
         ->orderBy('priority')
         ->get();
+
+        return response()->json($tasks);
     }
 
     /**
@@ -31,11 +33,31 @@ class TasksController extends Controller
     {
         $task = Task::create([
             'name' => $request->name,
-            'priority' => $request->priority ?? 1,
+            'priority' => $request->priority ?? Task::max('priority') + 1,
             'project_id' => $request->project_id ?? null,
         ]);
 
         return response()->json($task->fresh());
+    }
+
+    public function swapTasks(Request $request){
+        $task1 = Task::find($request->task1);
+        $task2 = Task::find($request->task2);
+
+        $tempPriority = $task1->priority;
+
+        $task1->update([
+            'priority' => $task2->priority,
+        ]);
+
+        $task2->update([
+            'priority' => $tempPriority,
+        ]);
+
+        return response()->json([
+            "task1" => $task1,
+            "task2" => $task2
+        ]);
     }
 
     /**
@@ -46,7 +68,7 @@ class TasksController extends Controller
      */
     public function show(Task $task)
     {
-        return $task;
+        return response()->json($task);
     }
 
     /**
@@ -63,7 +85,7 @@ class TasksController extends Controller
             'priority' => $request->priority ?? $task->priority,
         ]);
 
-        return $task;
+        return response()->json($task);
     }
 
     /**
@@ -74,6 +96,6 @@ class TasksController extends Controller
      */
     public function destroy(Task $task)
     {
-        return $task->delete();
+        return response()->json($task->delete());
     }
 }
